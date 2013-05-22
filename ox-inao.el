@@ -5,7 +5,8 @@
  'inao 'html
  :filters-alist '((:filter-paragraph . org-inao-filter-paragraph)
                   (:filter-quote-block . org-inao-filter-quote-block)
-                  (:filter-plain-list . org-inao-filter-plain-list))
+                  (:filter-plain-list . org-inao-filter-plain-list)
+                  (:filter-src-block . org-inao-filter-src-block))
  :translate-alist '((paragraph . org-inao-paragraph)
                     (inner-template . org-inao-inner-template)
                     (headline . org-inao-headline)
@@ -16,7 +17,9 @@
                     (section . org-inao-section)
                     (quote-block . org-inao-quote-block)
                     (plain-list . org-inao-plain-list)
-                    (item . org-inao-item)))
+                    (item . org-inao-item)
+                    (src-block . org-inao-src-block)
+                    ))
 
 (defun org-inao-paragraph (paragraph contents info)
   (replace-regexp-in-string "\n" "" contents))
@@ -85,6 +88,21 @@
 
 (defun org-inao-filter-plain-list (plain-list back-end info)
   (org-inao-filter-quote-block plain-list back-end info))
+
+(defun org-inao-src-block (src-block contents info)
+  (let* ((caption (org-export-get-caption src-block))
+         (code (org-element-property :value src-block)))
+    (concat "◆list/◆\n"
+            code
+            "◆/list◆")))
+
+(defun org-inao-filter-src-block (src-block back-end info)
+  (replace-regexp-in-string
+   "\n\n$" "\n"
+  (replace-regexp-in-string
+   "(注:\\(.*?\\))" "◆comment/◆\\1◆/comment◆"
+  (replace-regexp-in-string
+   "\\*\\*\\(.*?\\)\\*\\*" "◆cmd-b/◆\\1◆/cmd-b◆" src-block))))
 
 (provide 'ox-inao)
 
