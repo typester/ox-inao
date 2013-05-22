@@ -4,7 +4,8 @@
 (org-export-define-derived-backend
  'inao 'html
  :filters-alist '((:filter-paragraph . org-inao-filter-paragraph)
-                  (:filter-quote-block . org-inao-filter-quote-block))
+                  (:filter-quote-block . org-inao-filter-quote-block)
+                  (:filter-plain-list . org-inao-filter-plain-list))
  :translate-alist '((paragraph . org-inao-paragraph)
                     (inner-template . org-inao-inner-template)
                     (headline . org-inao-headline)
@@ -13,7 +14,9 @@
                     (verbatim . org-inao-verbatim)
                     (footnote-reference . org-inao-footnote-reference)
                     (section . org-inao-section)
-                    (quote-block . org-inao-quote-block)))
+                    (quote-block . org-inao-quote-block)
+                    (plain-list . org-inao-plain-list)
+                    (item . org-inao-item)))
 
 (defun org-inao-paragraph (paragraph contents info)
   (replace-regexp-in-string "\n" "" contents))
@@ -62,4 +65,26 @@
   (replace-regexp-in-string
    "◆i/◆\\(.*?\\)◆/i◆" "◆i-j/◆\\1◆/i-j◆" quote-block))
 
+(defun org-inao-plain-list (plain-list contents info)
+  contents)
+
+(defun org-inao-ordered-item-bullet (bullet)
+  (if (string-match "^[0-9]." bullet)
+      (format "（%s）" (replace-regexp-in-string ".*?\\([0-9]+\\).*" "\\1" bullet))))
+
+(defun org-inao-item (item contents info)
+  (let* ((plain-list (org-export-get-parent item))
+         (type (org-element-property :type plain-list))
+         ;(counter (org-element-property :counter item) ;; counterで連番とれるとおもいきやとれないのでbulletを置換する
+         (bullet (org-element-property :bullet item)))
+    (concat
+     (case type
+       (ordered (org-inao-ordered-item-bullet bullet))
+       (unordered "・"))
+     contents)))
+
+(defun org-inao-filter-plain-list (plain-list back-end info)
+  (org-inao-filter-quote-block plain-list back-end info))
+
 (provide 'ox-inao)
+
