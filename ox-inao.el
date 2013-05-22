@@ -6,7 +6,8 @@
  :filters-alist '((:filter-paragraph . org-inao-filter-paragraph)
                   (:filter-quote-block . org-inao-filter-quote-block)
                   (:filter-plain-list . org-inao-filter-plain-list)
-                  (:filter-src-block . org-inao-filter-src-block))
+                  (:filter-src-block . org-inao-filter-src-block)
+                  (:filter-section . org-inao-filter-section))
  :translate-alist '((paragraph . org-inao-paragraph)
                     (inner-template . org-inao-inner-template)
                     (headline . org-inao-headline)
@@ -51,7 +52,7 @@
 
 (defun org-inao-filter-paragraph (paragraph back-end info)
   (replace-regexp-in-string
-   "\n\n" "\n"
+   "\n\n+$" "\n"
    (org-inao-filter-space-around-markup paragraph "◆\\(?:[bi]\\|cmd\\)/◆" "◆/\\(?:[bi]\\|cmd\\)◆")))
 
 (defun org-inao-footnote-reference (footnote-reference contents info)
@@ -111,5 +112,27 @@
   (replace-regexp-in-string
    "\\*\\*\\(.*?\\)\\*\\*" "◆cmd-b/◆\\1◆/cmd-b◆" src-block)))))
 
+(defun org-inao-filter-section (section back-end info)
+  (replace-regexp-in-string
+   "\n\n+$" "\n" section))
+
+;; End-user functions
+(defun org-inao-export-to-inao
+  (&optional async subtreep visible-only body-only ext-plist)
+  (interactive)
+  (let* ((extension ".inao.txt")        ; TODO: make customize variable
+         (body-only t)                  ; force body-only
+         (file (org-export-output-file-name extension subtreep)))
+    (if async
+        (org-export-async-start
+            (lambda (f) (org-export-add-to-stack f 'inao))
+          (let ((org-export-coding-system 'utf-8))
+            `(expand-file-name
+              (org-export-to-file
+               'inao ,file ,subtreep ,visible-only ,body-only ',ext-plist))))
+      (let ((org-export-coding-system 'utf-8))
+        (org-export-to-file
+         'inao file subtreep visible-only body-only ext-plist)))))
+            
 (provide 'ox-inao)
 
