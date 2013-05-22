@@ -69,7 +69,7 @@
   contents)
 
 (defun org-inao-ordered-item-bullet (bullet)
-  (if (string-match "^[0-9]." bullet)
+  (if (string-match "^[0-9]+[.)]" bullet)
       (format "（%s）" (replace-regexp-in-string ".*?\\([0-9]+\\).*" "\\1" bullet))))
 
 (defun org-inao-item (item contents info)
