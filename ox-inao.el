@@ -3,7 +3,8 @@
 
 (org-export-define-derived-backend
  'inao 'html
- :filters-alist '((:filter-paragraph . org-inao-filter-paragraph))
+ :filters-alist '((:filter-paragraph . org-inao-filter-paragraph)
+                  (:filter-quote-block . org-inao-filter-quote-block))
  :translate-alist '((paragraph . org-inao-paragraph)
                     (inner-template . org-inao-inner-template)
                     (headline . org-inao-headline)
@@ -12,7 +13,7 @@
                     (verbatim . org-inao-verbatim)
                     (footnote-reference . org-inao-footnote-reference)
                     (section . org-inao-section)
-                    ))
+                    (quote-block . org-inao-quote-block)))
 
 (defun org-inao-paragraph (paragraph contents info)
   (replace-regexp-in-string "\n" "" contents))
@@ -53,5 +54,12 @@
 
 (defun org-inao-section (section contents info)
   contents)
+
+(defun org-inao-quote-block (quote-block contents info)
+  (format "◆quote/◆\n%s◆/quote◆" contents))
+
+(defun org-inao-filter-quote-block (quote-block back-end info)
+  (replace-regexp-in-string
+   "◆i/◆\\(.*?\\)◆/i◆" "◆i-j/◆\\1◆/i-j◆" quote-block))
 
 (provide 'ox-inao)
