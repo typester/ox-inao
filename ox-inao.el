@@ -66,7 +66,9 @@
 
 (defun org-inao-filter-quote-block (quote-block back-end info)
   (replace-regexp-in-string
-   "◆i/◆\\(.*?\\)◆/i◆" "◆i-j/◆\\1◆/i-j◆" quote-block))
+   "\n\n$" "\n"
+  (replace-regexp-in-string
+   "◆i/◆\\(.*?\\)◆/i◆" "◆i-j/◆\\1◆/i-j◆" quote-block)))
 
 (defun org-inao-plain-list (plain-list contents info)
   contents)
@@ -93,6 +95,9 @@
   (let* ((caption (org-export-get-caption src-block))
          (code (org-element-property :value src-block)))
     (concat "◆list/◆\n"
+            (if (not caption) ""
+              (format "●%s\n" (replace-regexp-in-string
+                              "::" "	" (org-export-data caption info))))
             code
             "◆/list◆")))
 
@@ -102,7 +107,9 @@
   (replace-regexp-in-string
    "(注:\\(.*?\\))" "◆comment/◆\\1◆/comment◆"
   (replace-regexp-in-string
-   "\\*\\*\\(.*?\\)\\*\\*" "◆cmd-b/◆\\1◆/cmd-b◆" src-block))))
+   "___\\(.*?\\)___" "◆i-j/◆\\1◆/i-j◆"
+  (replace-regexp-in-string
+   "\\*\\*\\(.*?\\)\\*\\*" "◆cmd-b/◆\\1◆/cmd-b◆" src-block)))))
 
 (provide 'ox-inao)
 
